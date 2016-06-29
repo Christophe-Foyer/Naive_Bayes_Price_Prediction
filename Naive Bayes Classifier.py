@@ -2,10 +2,7 @@
 
 # Wheat price prediction using Baysian classification.
 # Version 1.0
-# Christophe Foyer - 2006
-
-#Special thanks to Machine Learning Mastery
-#http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
+# Christophe Foyer - 2016
 
 from xlrd import open_workbook
 import random
