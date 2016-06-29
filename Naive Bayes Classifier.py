@@ -4,9 +4,6 @@
 # Version 1.0
 # Christophe Foyer - 2006
 
-#Special thanks to Machine Learning Mastery
-#http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
-
 from xlrd import open_workbook
 import random
 import math
