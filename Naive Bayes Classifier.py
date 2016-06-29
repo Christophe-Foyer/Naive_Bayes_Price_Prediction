@@ -4,6 +4,9 @@
 # Version 1.0
 # Christophe Foyer - 2006
 
+#Special thanks to Machine Learning Mastery
+#http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
+
 from xlrd import open_workbook
 import random
 import math
@@ -96,8 +99,6 @@ def importExcel(filename):
             #now all the data should be accessible from the "dataset" array
     return dataset
 
-#This next portion of the code is not working yet but I just need to adapt it to my data format.
-            
 def splitDataset(dataset, splitRatio):
 	trainSize = int(len(dataset) * splitRatio)
 	trainSet = []
@@ -106,7 +107,7 @@ def splitDataset(dataset, splitRatio):
 		index = random.randrange(len(copy))
 		trainSet.append(copy.pop(index))
 	return [trainSet, copy]
- 
+
 def separateByClass(dataset):
 	separated = {}
 	for i in range(len(dataset)):
@@ -115,31 +116,31 @@ def separateByClass(dataset):
 			separated[round(vector[4])] = []
 		separated[round(vector[4])].append(vector)
 	return separated
- 
+
 def mean(numbers):
 	return sum(numbers)/float(len(numbers))
- 
+
 def stdev(numbers):
 	avg = mean(numbers)
 	variance = sum([pow(x-avg,2) for x in numbers])/float(len(numbers)-1)
 	return math.sqrt(variance)
- 
+
 def summarize(dataset):
 	summaries = [(mean(attribute), stdev(attribute)) for attribute in zip(*dataset)]
 	del summaries[4]
 	return summaries
- 
+
 def summarizeByClass(dataset):
 	separated = separateByClass(dataset)
 	summaries = {}
 	for classValue, instances in separated.iteritems():
 		summaries[classValue] = summarize(instances)
 	return summaries
- 
+
 def calculateProbability(x, mean, stdev):
 	exponent = math.exp(-(math.pow(x-mean,2)/(2*math.pow(stdev,2))))
 	return (1 / (math.sqrt(2*math.pi) * stdev)) * exponent
- 
+
 def calculateClassProbabilities(summaries, inputVector):
 	probabilities = {}
 	for classValue, classSummaries in summaries.iteritems():
@@ -149,7 +150,7 @@ def calculateClassProbabilities(summaries, inputVector):
 			x = inputVector[i]
 			probabilities[classValue] *= calculateProbability(x, mean, stdev)
 	return probabilities
-			
+
 def predict(summaries, inputVector):
 	probabilities = calculateClassProbabilities(summaries, inputVector)
 	bestLabel, bestProb = None, -1
@@ -158,21 +159,21 @@ def predict(summaries, inputVector):
 			bestProb = probability
 			bestLabel = classValue
 	return bestLabel
- 
+
 def getPredictions(summaries, testSet):
 	predictions = []
 	for i in range(len(testSet)):
 		result = predict(summaries, testSet[i])
 		predictions.append(result)
 	return predictions
- 
+
 def getAccuracy(testSet, predictions):
 	correct = 0
 	for i in range(len(testSet)):
 		if testSet[i][-1] == predictions[i]:
 			correct += 1
 	return (correct/float(len(testSet))) * 100.0
- 
+
 def main():
 	splitRatio = 0.67
 	dataset = importExcel(filename)
