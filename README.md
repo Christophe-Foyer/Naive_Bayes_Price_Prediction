@@ -5,7 +5,7 @@ This specific example will be used to demonstrate the capabilities of a naive ba
 
 #Dependencies
 
-xlrd for importing excel files: https://github.com/python-excel/xlrd
+https://github.com/python-excel/xlrd
 
 #Usage:
 
