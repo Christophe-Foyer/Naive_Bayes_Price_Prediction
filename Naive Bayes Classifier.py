@@ -30,7 +30,7 @@ def importExcel(filename):
         date_string = []
         price = []
         rows = []
-        for row in range(1, number_of_rows-1):
+        for row in range(1, number_of_rows):
                 #excel stores dates as the number of days since 1900-Jan-0 (not sure if that means january 1st or december 31st but that won't matter much in our case)
                 #new method: substract number of days in year until negative
                 date_string  = str(sheet.cell(row,0).value)
@@ -78,11 +78,12 @@ def importExcel(filename):
                 value  = (sheet.cell(row,1).value)
                 try:
                     value = str(int(value))
+                    dataset[row-1][4] = float(value)
                 except ValueError:
                     pass
                 finally:
-                    dataset[row-1][4] = float(value)
-                    
+                    dataset[row-1][4] = round(float(value)/10,0)*10
+
                 #now the rest of the data
                 for col in range(2, number_of_columns):
                     value  = (sheet.cell(row,col).value)
@@ -92,7 +93,8 @@ def importExcel(filename):
                     except ValueError:
                         pass
                 #now all the data should be accessible from the "dataset" array
-    print dataset
+    del dataset[-1]
+    #print dataset
     return dataset
 
 def splitDataset(dataset, splitRatio):
@@ -127,10 +129,12 @@ def stdev(numbers):
 def summarize(dataset):
 	summaries = [(mean(attribute), stdev(attribute)) for attribute in zip(*dataset)]
 	del summaries[4]
+	print summaries
 	return summaries
 
 def summarizeByClass(dataset):
 	separated = separateByClass(dataset)
+	print separated
 	summaries = {}
 	for classValue, instances in separated.iteritems():
 		summaries[classValue] = summarize(instances)
@@ -172,7 +176,7 @@ def getPredictions(summaries, testSet):
 def getAccuracy(testSet, predictions):
 	correct = 0
 	for i in range(len(testSet)):
-		if testSet[i][-1] == predictions[i]:
+		if testSet[i][4] == predictions[i]:
 			correct += 1
 	return (correct/float(len(testSet))) * 100.0
 
