@@ -18,9 +18,6 @@ filename = 'Wheat-price-data.xlsx'
 def importExcel(filename):
     #this function is a very ugly, and not that effecient. but it should work...
     excel = open_workbook(filename)
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    month_day_count = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    leap_years = [1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932, 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040, 2044, 2048, 2052, 2056, 2060, 2064, 2068, 2072, 2076, 2080, 2084, 2088, 2092, 2096]
     #extract data from excel sheet
     for sheet in excel.sheets():
         number_of_rows = sheet.nrows
@@ -36,44 +33,7 @@ def importExcel(filename):
                 date_string  = str(sheet.cell(row,0).value)
                 days = float(date_string)
                 dataset[row-1][0] = float(days)
-                i = 0
-                leap = 0
-                #this will find how many years and how many leftover days for that year
-                while days >= (365 + leap):
-                    leap = 0
-                    if i + 1900 in leap_years:
-                        leap = 1
-                    days = days - 365 - leap
-                    i = i + 1
-                year = i
-                #now find the month and leftover days given leftover days
-                month = 1
-                for i in range(1, 12):
-                    #for debugging
-                    #if year + 1900 == 1998:
-                    #    print days, month ,year
-                    ##############
-                    if (year + 1900 in leap_years) and (i == 2):
-                         leap = 1
-                    else:
-                         leap = 0
-                    if days <= (month_day_count[i-1] + leap):
-                        break
-                    else:
-                        days = days - month_day_count[i-1] - leap
-                        month = i + 1
-                #now we should have the exact date seperated in day, month and year
-                if (year + 1900 in leap_years):
-                         leap = 1
-                else:
-                         leap = 0
-                #different format, easier to use decimals
-                #date_new = int(days), int(month), int(year+1900),
-                date_new = (year + 1900) + month / 12 + days /(365 + leap)
-                date.append(date_new)
-                dataset[row-1][1] = float(year + 1900)
-                dataset[row-1][2] = float(month)
-                dataset[row-1][3] = float(days)
+                [dataset[row-1][1], dataset[row-1][2], dataset[row-1][3]] = excelDate(days)
                     
                 value  = (sheet.cell(row,1).value)
                 try:
@@ -96,6 +56,34 @@ def importExcel(filename):
     del dataset[-1]
     #print dataset
     return dataset
+
+def excelDate(days):
+        month_day_count = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        leap_years = [1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932, 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040, 2044, 2048, 2052, 2056, 2060, 2064, 2068, 2072, 2076, 2080, 2084, 2088, 2092, 2096]
+        i = 0
+        leap = 0
+        #this will find how many years and how many leftover days for that year
+        while days >= (365 + leap):
+            leap = 0
+            if i + 1900 in leap_years:
+                leap = 1
+            days = days - 365 - leap
+            i = i + 1
+        year = i
+        #now find the month and leftover days given leftover days
+        month = 1
+        for i in range(1, 12):
+            if (year + 1900 in leap_years) and (i == 2):
+                 leap = 1
+            else:
+                 leap = 0
+            if days <= (month_day_count[i-1] + leap):
+                break
+            else:
+                days = days - month_day_count[i-1] - leap
+                month = i + 1
+        #now we should have the exact date seperated in day, month and year
+        return [year, month, days]
 
 def splitDataset(dataset, splitRatio):
 	trainSize = int(len(dataset) * splitRatio)
