@@ -4,6 +4,7 @@
 # Version 1.0
 # Christophe Foyer - 2016
 
+
 from xlrd import open_workbook
 import random
 import math
@@ -12,7 +13,7 @@ import math
 
 filename = 'Wheat-price-data.xlsx'
 
-#import wheat price data (will automate downloading later, probably a different script that write to the excel file)
+#import wheat price data (will automate downloading later, probably a different script that writes to the excel file)
 
 def importExcel(filename):
     #this function is a very ugly, and not that effecient. but it should work...
@@ -24,17 +25,17 @@ def importExcel(filename):
     for sheet in excel.sheets():
         number_of_rows = sheet.nrows
         number_of_columns = sheet.ncols
-        dataset = [[]]*(number_of_columns + 2)
+        dataset = [['unknown'] * (number_of_columns + 3)] * number_of_rows
         date = []
         date_string = []
         price = []
         rows = []
-        #this method is already obsolete (since it's less accurate and doesn't use the same format)
-        #but since it works for things that may not be typed in correctly it might help in case of user error
         for row in range(1, number_of_rows):
             #excel stores dates as the number of days since 1900-Jan-0 (not sure if that means january 1st or december 31st but that won't matter much in our case)
             #new method: substract number of days in year until negative
+            date_string  = str(sheet.cell(row,0).value)
             days = float(date_string)
+            dataset[row][0] = int(days)
             i = 0
             leap = 0
             #this will find how many years and how many leftover days for that year
@@ -64,36 +65,34 @@ def importExcel(filename):
             #now we should have the exact date seperated in day, month and year
             if (year + 1900 in leap_years):
                      leap = 1
-                else:
+            else:
                      leap = 0
             #different format, easier to use decimals
             #date_new = int(days), int(month), int(year+1900),
             date_new = (year + 1900) + month / 12 + days /(365 + leap)
             date.append(date_new)
-            dataset[1].append(year)
-            dataset[2].append(month)
-            dataset[3].append(days)
+            dataset[row][1] = year + 1900
+            dataset[row][2] = month
+            dataset[row][3] = int(days)
                 
             value  = (sheet.cell(row,1).value)
             try:
                 value = str(int(value))
             except ValueError:
-                dataset[4].append('unknown')
                 pass
             finally:
-                dataset[4].append(value)
+                dataset[row][4] = float(value)
                 
             #now the rest of the data
             for col in range(2, number_of_columns):
                 value  = (sheet.cell(row,col).value)
                 try:
-                    value = str(int(value))
+                    value = float(value)
                 except ValueError:
-                    dataset[col + 2].append('unknown')
                     pass
                 finally:
-                    dataset[col + 2].append(value)
-            #now all the data should be accessible from the "dataset" array
+                    dataset[row][col + 3] = value
+                    #now all the data should be accessible from the "dataset" array
     return dataset
 
 def splitDataset(dataset, splitRatio):
@@ -144,6 +143,9 @@ def calculateClassProbabilities(summaries, inputVector):
 		probabilities[classValue] = 1
 		for i in range(len(classSummaries)):
 			mean, stdev = classSummaries[i]
+                        #fixing 0 standard deviation
+			if stdev == 0:
+				stdev = 10^-10
 			x = inputVector[i]
 			probabilities[classValue] *= calculateProbability(x, mean, stdev)
 	return probabilities
@@ -171,9 +173,16 @@ def getAccuracy(testSet, predictions):
 			correct += 1
 	return (correct/float(len(testSet))) * 100.0
 
+def relativeData(dataset):
+        for i in range(len(dataset)):
+            for j in range(i):
+                print(placeholder)
 def main():
 	splitRatio = 0.67
 	dataset = importExcel(filename)
+	print dataset
+	#reorganise data to include past days
+	#allData = relativeData(dataset)
 	print('Loaded data file {0} with {1} rows').format(filename, len(dataset))
 	trainingSet, testSet = splitDataset(dataset, splitRatio)
 	print('Split {0} rows into train={1} and test={2} rows').format(len(dataset), len(trainingSet), len(testSet))
