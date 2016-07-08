@@ -1,6 +1,8 @@
 # Naive_Bayes_Price_Prediction
 Data analysis using Naive Bayesian Classification.
 
+Caution: This is not in a usable state at this time and will yield varying results depending on many factors.
+
 This specific example will be used to demonstrate the capabilities of a naive bayes classifier to predict future prices of a produce, and in this case, wheat.
 
 #Dependencies
@@ -14,7 +16,7 @@ The first column must be the date for the price in the second date. Any column a
 
 #ToDo:
 
-This is still an ongoing project and still far from a final release. Please be aware of that.
+This is still an ongoing project and still far from a final release.
 -check more than the data associated with a specific day (look at past data).
 -handle missing data.
 -fix system to use different format to enable easier and mre efficient organisation.
