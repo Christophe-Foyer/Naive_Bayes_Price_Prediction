@@ -16,8 +16,8 @@ The first column must be the date for the price in the second date. Any column a
 
 #ToDo:
 
-This is still an ongoing project and still far from a final release.
--check more than the data associated with a specific day (look at past data).
--handle missing data.
--fix system to use different format to enable easier and mre efficient organisation.
--collect more data automatically (separate project, must be customized to a specific task)
+This is still an ongoing project and still far from a final release.  
+-check more than the data associated with a specific day (look at past data).   
+-handle missing data.  
+-fix system to use different format to enable easier and mre efficient organisation.  
+-collect more data automatically (separate project, must be customized to a specific task).  
