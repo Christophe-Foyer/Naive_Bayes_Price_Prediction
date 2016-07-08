@@ -11,3 +11,11 @@ https://github.com/python-excel/xlrd
 
 Place your excel file in the same folder as the python script and change filename in Naive Bayes Classifier to the name of your file.
 The first column must be the date for the price in the second date. Any column after that can be any set of data you wish. You can use Wheat_Price_Data.xlsx as an example for formatting.
+
+#ToDo:
+
+This is still an ongoing project and still far from a final release. Please be aware of that.
+-check more than the data associated with a specific day (look at past data).
+-handle missing data.
+-fix system to use different format to enable easier and mre efficient organisation.
+-collect more data automatically (separate project, must be customized to a specific task)
