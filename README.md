@@ -1,5 +1,4 @@
 # Naive_Bayes_Price_Prediction
-Caution: This is not in a usable state at this time and will yield varying results depending on many factors.
 
 Data analysis using Naive Bayesian Classification.
 
@@ -17,7 +16,7 @@ The first column must be the date for the price in the second date. Any column a
 #ToDo:
 
 This is still an ongoing project and still far from a final release.  
--check more than the data associated with a specific day (look at past data).   
--handle missing data.  
--fix system to use different format to enable easier and more efficient organization.  
+~~-check more than the data associated with a specific day (look at past data).~~   
+~~-handle missing data.~~  
+~~-fix system to use different format to enable easier and more efficient organization.~~  
 -collect more data automatically (separate project, must be customized to a specific task).  
