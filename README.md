@@ -4,6 +4,8 @@ Data analysis using Naive Bayesian Classification.
 
 This specific example will be used to demonstrate the capabilities of a naive bayes classifier to predict future prices of a produce, and in this case, wheat.
 
+This is in no way accurate and is more of an experiment to test the capabilities of a basic machine learning algorithm to estimate prices from a complex dataset.
+
 #Dependencies:
 
 https://github.com/python-excel/xlrd
