@@ -7,16 +7,16 @@ This specific example will be used to demonstrate the capabilities of a naive ba
 
 This is in no way accurate and is more of an experiment to test the capabilities of a basic machine learning algorithm to estimate prices from a complex dataset.
 
-#Dependencies:
+## Dependencies:
 
 https://github.com/python-excel/xlrd
 
-#Usage:
+## Usage:
 
 Place your excel file in the same folder as the python script and change filename in Naive Bayes Classifier to the name of your file.
 The first column must be the date for the price in the second date. Any column after that can be any set of data you wish. You can use Wheat_Price_Data.xlsx as an example for formatting.
 
-#ToDo:
+## ToDo:
 
 This is still an ongoing project and still far from a final release.  
 ~~-check more than the data associated with a specific day (look at past data).~~   
