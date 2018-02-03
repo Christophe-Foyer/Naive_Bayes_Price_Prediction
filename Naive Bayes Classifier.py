@@ -18,8 +18,8 @@ filename = 'Wheat-price-data.xlsx'
 # (will automate downloading later, probably a separate
 # script that writes to the excel file)
 
-def importExcel(filename):
-    #this function is a very ugly, and not that effecient. but it should work...
+def importExcel(filename, rounding):
+    #this function is a very ugly, but for now it does the job
     excel = open_workbook(filename)
     #extract data from excel sheet
     for sheet in excel.sheets():
@@ -44,7 +44,7 @@ def importExcel(filename):
                 except ValueError:
                     pass
                 finally:
-                    dataset[row-1][4] = round(float(value)/5,0)*5
+                    dataset[row-1][4] = round(float(value)/rounding,0)*rounding
 
                 #now the rest of the data
                 for col in range(2, number_of_columns):
@@ -95,17 +95,17 @@ def splitDataset(dataset, splitRatio):
 		trainSet.append(copy.pop(index))
 	return [trainSet, copy]
 
-def separateByClass(dataset):
+def separateByClass(dataset, rounding):
         #this might not be working correctly    
         separated = {}
         for i in range(len(dataset)):
-                vector = dataset[i]
+                vector = dataset[i] 
                 if (vector[0] not in separated):
                         separated[vector[0]] = {}
                 for classValue, instances in vector[1].iteritems():
-                        if (classValue not in separated[vector[0]]):
-                            separated[vector[0]][classValue] = []
-                        separated[vector[0]][classValue].append(vector[1][classValue][0])
+                        if (round(float(classValue)/rounding, 0)*rounding not in separated[vector[0]]):
+                            separated[vector[0]][round(float(classValue)/rounding, 0)*rounding] = []
+                        separated[vector[0]][round(float(classValue)/rounding, 0)*rounding].append(vector[1][classValue][0])
 ##                separated[vector[0]].append(vector[1])
 ##                if len(separated[vector[0]]) > 2:
 ##                    separated[vector[0]][1] = separated[vector[0]][1] + separated[vector[0]][2]
@@ -134,8 +134,8 @@ def summarize(dataset):
         summaries = [(mean(attribute), stdev(attribute)) for attribute in zip(*dataset)]
         return summaries
 
-def summarizeByClass(dataset):
-        separated = separateByClass(dataset)
+def summarizeByClass(dataset, rounding):
+        separated = separateByClass(dataset, rounding)
         summaries = {}
         for price, instances in separated.iteritems():
             # print 'loaded price data for :', price
@@ -176,8 +176,15 @@ def calculateClassProbabilities(summaries, inputVector):
                                         classProbabilities *= calculateProbability(x, mean, stdev)
                                         priceProbability.append(classProbabilities)
                         else: #I still have to decide what to do if there's no corresponding data (pretty likely to happen)
-                            #print 'no prior data'
-                            pass
+
+                                #should regroup data within rounding parameters and test it for that data
+                                #if there is no such data, then we should look for more data outside the rouding
+                                #parameters (maybe linear regression between the two closest points? Maybe fit a curve to the data?)
+                                
+                                #for i in range(len(classSummaries)):
+                                #    priceProbability.append(0.5)
+                                
+                                pass
                 #print 'prob', priceProbability
                 probabilities[price] *= priceProbability
         return probabilities
@@ -205,7 +212,7 @@ def getAccuracy(testSet, predictions):
 			correct += 1
 	return (correct/float(len(testSet))) * 100.0
 
-def reorganizeData(dataset, rounding):
+def reorganizeData(dataset):
         #this function reorganises the data for better classification, unfortunately given the drastic changes made to the code
         #to implement this new format, the data now has to be reorganized for the code to work
         reorganizedData = [["unknown"] for y in range(len(dataset))]
@@ -213,40 +220,75 @@ def reorganizeData(dataset, rounding):
             reorganizedData[i] = [dataset[i][4]]
             listList = {}
             for j in range(len(dataset)):
-                if dataset[i][0] > dataset[j][0]:
+                if dataset[i][0] >= dataset[j][0]:
                     vector = copy.deepcopy(dataset[j])
                     # round relative dates (reduces amount of classes)
                     # lower rounding means higher accuracy
-                    vector[0] = round(float(dataset[i][0] - dataset[j][0])/rounding, 0)*rounding
+                    vector[0] = dataset[i][0] - dataset[j][0]
                     if (vector[0] not in listList):
                             listList[vector[0]] = []
                     listList[vector[0]].append(vector)
             reorganizedData[i].append(listList)
         return reorganizedData
 
-def main():
-	splitRatio = 0.67
-	rounding = 1 # days to approximate to (extends dataset)
-	dataset = importExcel(filename)
-	# reorganise data to include past days might include it in importEcel later
-	dataset = reorganizeData(dataset, rounding)
-	#print('Loaded data file {0} with {1} rows').format(filename, len(dataset))
-	trainingSet, testSet = splitDataset(dataset, splitRatio)
-	#print('Split {0} rows into train={1} and test={2} rows').format(len(dataset), len(trainingSet), len(testSet))
-	# prepare model
-	summaries = summarizeByClass(trainingSet)
-	# test model
-	predictions = getPredictions(summaries, testSet)
-	accuracy = getAccuracy(testSet, predictions)
-	print('Accuracy: {0}%').format(accuracy)
-	return accuracy
+def createModel(rounding, roundingPrice):
+        splitRatio = 0.67
+        #rounding = 30 # days to approximate to (extends dataset)
+        #roundingPrice = 10 # units to round to for the price column of the data
+        dataset = importExcel(filename, roundingPrice)
+        # reorganise data to include past days might include it in importEcel later
+        dataset = reorganizeData(dataset)
+        print('Loaded data file {0} with {1} rows').format(filename, len(dataset))
+        trainingSet, testSet = splitDataset(dataset, splitRatio)
+        print('Split {0} rows into train={1} and test={2} rows').format(len(dataset), len(trainingSet), len(testSet))
+        print('Rounding prices to {0} units, and dates to {1} days').format(roundingPrice, rounding)
+        # prepare model
+        print('Preparing model...')
+        summaries = summarizeByClass(trainingSet, rounding)
+        # test model
+        predictions = getPredictions(summaries, testSet)
+        print('Testing model...')
+        accuracy = getAccuracy(testSet, predictions)
+        print('Accuracy: {0}%').format(accuracy)
+        #this snipet of code returns a prediction
+        #inputVector = [36100.0, 98, 11, 1.0, 1.0, 111.77, 0.04575224550898204]
+        #prediction = getPredictions(summaries, reorganizeData([inputVector]))
+        #print prediction
+        return [accuracy, summaries]
 
-def testAccuracy(iterations):
-        averageAccuracy = main()
+def testAccuracy(iterations, rounding, roundingPrice):
+        [averageAccuracy, summaries] = createModel(rounding, roundingPrice)
         for i in range(iterations - 1):
-            accuracy = main()
+            [accuracy, summaries] = createModel(rounding, roundingPrice)
             averageAccuracy = (averageAccuracy*i+accuracy)/(i+1)
         print('Average Accuracy: {0}%').format(averageAccuracy)
+        return averageAccuracy
 
-testAccuracy(30)
+def findBestSettings(testRange, numberOfTests):
+        accuracy = []
+        bestAccuracy = [0, 0]
+        roundingPrice = 1
+        for i in range(testRange[0], testRange[1]):
+            print "rounding to", i, "days"
+            accuracy.append(testAccuracy(numberOfTests, i, roundingPrice))
+            if accuracy[i - 1 - testRange[0]] > bestAccuracy[0]:
+                bestAccuracy = [accuracy[i - 1 - testRange[0]], i]
+        print "accuracy", accuracy
+        print "best", bestAccuracy
+        #69 is the best setting for now (7.7% average accuracy)
+
+
+#this snipet of code returns a prediction
+def makePrediction(inputVector):
+    #if no data, write unknown, same format as in the file
+    prediction = getPredictions(summaries, reorganizeData([inputVector]))
+    print prediction
+
+[averageAccuracy, summaries] = createModel(1, 10)
+#example format:
+#inputVector = [36100.0, 98, 11, 1.0, 111.77, 0.04575224550898204]
+#if no date is given, put a placeholder date anyways (it's how it organises things, might fix later)
+inputVector = [36100.0, 98, 11, 1.0, "unknown", 0.04575224550898204]
+makePrediction(inputVector)        
+#findBestSettings([1, 100], 15)
 
