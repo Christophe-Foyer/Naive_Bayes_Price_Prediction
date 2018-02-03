@@ -1,6 +1,7 @@
 # Naive_Bayes_Price_Prediction
 
-Data analysis using Naive Bayesian Classification.
+Data analysis using Naive Bayesian Classification based on this guide (but with significant modifications to accomodate for incomplete datasets):
+https://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
 
 This specific example will be used to demonstrate the capabilities of a naive bayes classifier to predict future prices of a produce, and in this case, wheat.
 
